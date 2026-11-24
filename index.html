@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertical Garden • Sherwood Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--forest:#234b36;--forest2:#315d42;--moss:#78915a;--cream:#f5f0df;--paper:#fffdf4;--ink:#283b2d;--muted:#89917e;--line:#e8e2ce;--gold:#d9ad55;--shadow:0 10px 28px rgba(44,62,39,.08)}
+*{box-sizing:border-box}body{margin:0;background:#eee9d8;color:var(--ink);font-family:'DM Sans',sans-serif}
+.app{min-height:100vh;display:grid;grid-template-columns:220px 1fr}
+.sidebar{background:var(--forest);color:#f6f0dc;padding:24px 16px;display:flex;flex-direction:column;gap:24px}
+.brand{padding:17px 14px;border:1px solid #71866a;border-radius:15px;background:rgba(255,255,255,.07);text-align:center}
+.brand small{display:block;font-size:10px;letter-spacing:2px;color:#d5d9b9}.brand strong{font:700 25px 'Playfair Display',serif;display:block;margin:4px 0}.brand span{font-size:11px;color:#d5d9b9}
+.nav{display:grid;gap:7px}.nav a{color:#dce4d0;text-decoration:none;padding:11px 13px;border-radius:12px;font-size:13px}.nav a.active,.nav a:hover{background:#f4efdf;color:var(--forest);font-weight:700}
+.side-note{margin-top:auto;border-radius:15px;background:#315d42;padding:15px;font-size:12px;line-height:1.7;color:#e3e8d2}.side-note b{display:block;color:#f3d88e;margin-bottom:5px}
+main{min-width:0;padding:22px 28px 30px;max-width:1500px;width:100%;margin:auto}
+.hero{height:180px;border-radius:20px;overflow:hidden;position:relative;background:linear-gradient(90deg,rgba(32,65,43,.84),rgba(32,65,43,.25)),linear-gradient(180deg,#c9d5b7,#9eae80 58%,#637d50);box-shadow:var(--shadow);color:#fff;padding:27px 30px;display:flex;align-items:center}
+.hero:after{content:"🌲  🌲     🌲       ⛺       🌲  🌲";position:absolute;right:20px;bottom:18px;font-size:45px;opacity:.8;white-space:nowrap;filter:drop-shadow(0 4px 4px #42533a)}
+.eyebrow{font-size:10px;letter-spacing:2px;color:#e1e8cb;font-weight:700}.hero h1{font:700 29px 'Playfair Display',serif;margin:9px 0}.hero p{font-size:13px;color:#edf0dc;margin:0;max-width:470px;line-height:1.6}.hero-content{position:relative;z-index:1}
+.hero-meta{position:absolute;right:24px;top:20px;background:rgba(255,253,244,.9);color:var(--forest);padding:10px 13px;border-radius:12px;font-size:11px;line-height:1.8;z-index:2}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:24px 2px 12px}.section-title h2{font:700 19px 'Playfair Display',serif;margin:0}.section-title span{font-size:11px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:17px;padding:17px;box-shadow:var(--shadow);min-width:0}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.card-head h3{font-size:13px;margin:0;font-weight:700}.tag{font-size:10px;border-radius:30px;padding:5px 9px;background:#edf1df;color:#587044}
+.sensor-icon{font-size:22px;width:40px;height:40px;border-radius:13px;background:#f2eddb;display:grid;place-items:center;margin-top:17px}
+.value{font:700 35px 'Playfair Display',serif;margin:9px 0 2px;letter-spacing:-1px}.unit{font:500 13px 'DM Sans',sans-serif;color:var(--muted)}
+.note{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
+.track{height:7px;background:#ecebdd;border-radius:20px;overflow:hidden;margin-top:15px}.fill{height:100%;width:0;border-radius:20px;background:linear-gradient(90deg,#9eaf6d,#557c4d);transition:width .5s}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;border-radius:30px;padding:6px 9px;background:#edf2e3;color:#547442;margin-top:10px}.status:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.status.warn{background:#fff1d8;color:#9c7227}.status.bad{background:#fbe5df;color:#a34c3d}.status.neutral{background:#eeeee8;color:#77796e}
+.lower{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px}.chart-wrap{height:235px;margin-top:12px}.details{display:grid;gap:0;margin-top:10px}.detail{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px}.detail:last-child{border:0}.detail span:first-child{color:var(--muted)}.detail strong{text-align:right}
+.footer{text-align:center;color:#92917e;font-size:10px;margin-top:22px;line-height:1.8}
+.connection{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:#e9f0dc;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);padding:7px 10px;border-radius:30px;margin-top:17px}.dot{width:7px;height:7px;border-radius:50%;background:#e4b75c}.dot.on{background:#8bd38b}
+@media(max-width:950px){.app{grid-template-columns:1fr}.sidebar{padding:12px 16px;gap:12px}.brand{padding:10px}.brand strong{font-size:20px}.nav{display:flex;overflow:auto}.nav a{white-space:nowrap}.side-note{display:none}main{padding:16px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.cards,.lower{grid-template-columns:1fr}.hero{height:190px;padding:20px}.hero h1{font-size:24px}.hero-meta{right:12px;top:12px;font-size:9px}.hero:after{font-size:29px;right:10px}.section-title{margin-top:20px}.value{font-size:32px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><small>WELCOME TO</small><strong>Sherwood</strong><span>Vertical Garden Island</span></div>
+  <nav class="nav">
+    <a class="active" href="#overview">⌂ &nbsp; Ikhtisar</a>
+    <a href="#sensors">♧ &nbsp; Monitoring</a>
+    <a href="#history">▤ &nbsp; Riwayat Data</a>
+    <a href="#device">⚙ &nbsp; Perangkat</a>
+  </nav>
+  <div class="side-note"><b>🌱 Catatan kebun</b>Jaga lingkungan tanaman tetap terpantau. Data diperbarui otomatis dari perangkat ESP32 melalui cloud.</div>
+</aside>
+<main>
+<header class="hero" id="overview">
+  <div class="hero-content">
+    <div class="eyebrow">SMART AGRICULTURE SYSTEM</div>
+    <h1>Selamat datang di kebunmu!</h1>
+    <p>Ringkasan kondisi lingkungan Vertical Garden dalam satu tempat. Pantau suhu, kelembapan, dan respons kualitas udara dari mana saja.</p>
+    <div class="connection"><span class="dot" id="cloudDot"></span><span id="cloudStatus">Menghubungkan ke cloud...</span></div>
+  </div>
+  <div class="hero-meta">📅 <span id="dateNow">--</span><br>◷ <span id="timeNow">--</span><br>☁ Cloud monitoring</div>
+</header>
+
+<div class="section-title"><h2>Ikhtisar kebun</h2><span id="lastUpdate">Menunggu data pertama</span></div>
+<section class="cards" id="sensors">
+  <article class="card">
+    <div class="card-head"><h3>Temperatur udara</h3><span class="tag">DHT22</span></div>
+    <div class="sensor-icon">🌡️</div><div class="value"><span id="temp">--</span> <span class="unit">°C</span></div>
+    <span class="status neutral" id="tempStatus">Menunggu data</span>
+    <div class="track"><div class="fill" id="tempBar"></div></div>
+    <p class="note">Suhu udara di sekitar area tanaman.</p>
+  </article>
+  <article class="card">
+    <div class="card-head"><h3>Kelembapan udara</h3><span class="tag">DHT22</span></div>
+    <div class="sensor-icon">💧</div><div class="value"><span id="humidity">--</span> <span class="unit">%</span></div>
+    <span class="status neutral" id="humStatus">Menunggu data</span>
+    <div class="track"><div class="fill" id="humBar"></div></div>
+    <p class="note">Kelembapan relatif udara di sekitar tanaman.</p>
+  </article>
+  <article class="card">
+    <div class="card-head"><h3>Respons sensor gas</h3><span class="tag">MQ-135</span></div>
+    <div class="sensor-icon">🍃</div><div class="value"><span id="air">--</span> <span class="unit">ADC</span></div>
+    <span class="status neutral" id="airStatus">Menunggu data</span>
+    <div class="track"><div class="fill" id="airBar"></div></div>
+    <p class="note">Nilai ADC hasil filter, bukan konsentrasi gas dalam ppm.</p>
+  </article>
+</section>
+
+<div class="lower">
+  <section class="card" id="history">
+    <div class="card-head"><h3>🌿 Riwayat kondisi lingkungan</h3><span class="tag">20 data terakhir</span></div>
+    <div class="chart-wrap"><canvas id="historyChart"></canvas></div>
+    <p class="note">Grafik menampilkan perubahan suhu dan kelembapan berdasarkan data cloud terbaru.</p>
+  </section>
+  <section class="card" id="device">
+    <div class="card-head"><h3>🪵 Informasi perangkat</h3><span class="tag">ESP32</span></div>
+    <div class="details">
+      <div class="detail"><span>Status cloud</span><strong id="deviceStatus">Menunggu</strong></div>
+      <div class="detail"><span>ADC MQ-135 mentah</span><strong id="rawAdc">--</strong></div>
+      <div class="detail"><span>ADC MQ-135 filter</span><strong id="filteredAdc">--</strong></div>
+      <div class="detail"><span>Tegangan ADC</span><strong id="voltage">-- V</strong></div>
+      <div class="detail"><span>Pembaruan terakhir</span><strong id="updatedAt">--</strong></div>
+      <div class="detail"><span>Sumber data</span><strong>ThingSpeak Cloud</strong></div>
+    </div>
+    <p class="note">Jika data berhenti diperbarui, periksa daya ESP32, koneksi Wi-Fi, dan konfigurasi channel.</p>
+  </section>
+</div>
+<footer class="footer"><b>VERTICAL GARDEN MONITORING SYSTEM</b><br>ESP32 • DHT22 • MQ-135 • ThingSpeak Cloud<br>Designed with a little forest spirit 🌲</footer>
+</main>
+</div>
+
+<script>
+// GANTI DENGAN ID CHANNEL THINGSPEAK MILIKMU.
+// Jika channel dibuat PUBLIC, READ_API_KEY boleh dikosongkan.
+const CHANNEL_ID = "3595877";
+const READ_API_KEY = "";
+
+const feedUrl = () => {
+  let url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?results=20`;
+  if (READ_API_KEY) url += `&api_key=${READ_API_KEY}`;
+  return url;
+};
+
+const $ = id => document.getElementById(id);
+function setStatus(id, text, kind="neutral") {
+  const el = $(id); el.textContent = text; el.className = `status ${kind}`;
+}
+function setBar(id, value, max) {
+  const pct = Math.max(0, Math.min(100, (Number(value) / max) * 100));
+  $(id).style.width = pct + "%";
+}
+function updateClock() {
+  const now = new Date();
+  $("dateNow").textContent = now.toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
+  $("timeNow").textContent = now.toLocaleTimeString("id-ID");
+}
+setInterval(updateClock,1000); updateClock();
+
+let chart;
+function initChart() {
+  const ctx = $("historyChart").getContext("2d");
+  chart = new Chart(ctx,{
+    type:"line",
+    data:{labels:[],datasets:[
+      {label:"Suhu (°C)",data:[],borderColor:"#c58b4b",backgroundColor:"rgba(197,139,75,.12)",tension:.35,yAxisID:"y",fill:true},
+      {label:"Kelembapan (%)",data:[],borderColor:"#6c9b9a",backgroundColor:"rgba(108,155,154,.08)",tension:.35,yAxisID:"y1",fill:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+      plugins:{legend:{labels:{usePointStyle:true,boxWidth:7,font:{family:"DM Sans",size:10}}}},
+      scales:{x:{ticks:{font:{size:9},maxRotation:0},grid:{display:false}},
+        y:{position:"left",title:{display:true,text:"°C"},ticks:{font:{size:9}},grid:{color:"rgba(90,100,70,.08)"}},
+        y1:{position:"right",title:{display:true,text:"%"},min:0,max:100,grid:{drawOnChartArea:false},ticks:{font:{size:9}}}}
+    }
+  });
+}
+
+function showCloudError(message) {
+  $("cloudStatus").textContent = message;
+  $("cloudDot").classList.remove("on");
+  $("deviceStatus").textContent = "Tidak terhubung";
+}
+
+async function loadData() {
+  if (CHANNEL_ID === "GANTI_CHANNEL_ID") {
+    showCloudError("Atur Channel ID di file index.html");
+    return;
+  }
+  try {
+    const response = await fetch(feedUrl(), {cache:"no-store"});
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const json = await response.json();
+    if (!json.feeds || json.feeds.length === 0) throw new Error("Belum ada data pada channel");
+    const feeds = json.feeds;
+    const latest = feeds[feeds.length-1];
+    // ThingSpeak dapat mengirim null atau string kosong untuk field yang belum terisi.
+    const readField = value => (value === null || value === undefined || value === "")
+      ? NaN : Number(value);
+    const temp = readField(latest.field1);
+    const hum = readField(latest.field2);
+    const air = readField(latest.field3);
+    const voltage = readField(latest.field4);
+    const raw = readField(latest.field5);
+
+    if (Number.isFinite(temp)) {
+      $("temp").textContent = temp.toFixed(1);
+      setStatus("tempStatus",temp < 18 ? "Dingin" : temp <= 30 ? "Normal" : "Panas",
+        temp < 18 || temp > 30 ? "warn" : "");
+      setBar("tempBar",temp,45);
+    }
+    if (Number.isFinite(hum)) {
+      $("humidity").textContent = hum.toFixed(1);
+      setStatus("humStatus",hum < 40 ? "Rendah" : hum <= 70 ? "Normal" : "Tinggi",
+        hum < 40 || hum > 70 ? "warn" : "");
+      setBar("humBar",hum,100);
+    }
+    if (Number.isFinite(air)) {
+      $("air").textContent = Math.round(air);
+      // Ambang hanya indikator relatif awal, bukan kategori ppm terkalibrasi.
+      setStatus("airStatus",air < 1200 ? "Respons relatif rendah" : air < 2500 ? "Respons relatif sedang" : "Respons relatif tinggi",
+        air < 1200 ? "" : air < 2500 ? "warn" : "bad");
+      setBar("airBar",air,4095);
+    }
+
+    $("rawAdc").textContent = Number.isFinite(raw) ? Math.round(raw) : "--";
+    $("filteredAdc").textContent = Number.isFinite(air) ? Math.round(air) : "--";
+    $("voltage").textContent = Number.isFinite(voltage) ? voltage.toFixed(3)+" V" : "-- V";
+
+    const stamp = new Date(latest.created_at);
+    const stampText = stamp.toLocaleString("id-ID");
+    $("updatedAt").textContent = stampText;
+    $("lastUpdate").textContent = "Data terakhir: " + stampText;
+    $("cloudStatus").textContent = "Cloud terhubung • data diterima";
+    $("cloudDot").classList.add("on");
+    $("deviceStatus").textContent = "Online";
+
+    const labels = feeds.map(f => new Date(f.created_at).toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"}));
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = feeds.map(f => readField(f.field1));
+    chart.data.datasets[1].data = feeds.map(f => readField(f.field2));
+    chart.update();
+  } catch (err) {
+    showCloudError("Cloud belum dapat dibaca");
+    $("deviceStatus").textContent = err.message;
+    console.error(err);
+  }
+}
+
+initChart();
+loadData();
+setInterval(loadData,15000);
+</script>
+</body>
+</html>
